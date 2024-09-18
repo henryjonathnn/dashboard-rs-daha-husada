@@ -6,18 +6,22 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@inertiajs/inertia-react": "^0.8.1",
+        "@inertiajs/react": "^1.2.0",
+        "@types/react": "^18.3.7",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.3.1",
         "autoprefixer": "^10.4.20",
         "axios": "^1.6.4",
         "laravel-vite-plugin": "^1.0.0",
         "postcss": "^8.4.47",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
         "tailwindcss": "^3.4.12",
         "vite": "^5.0.0"
     },
     "dependencies": {
-        "@inertiajs/inertia-react": "^0.8.1",
-        "@inertiajs/react": "^1.2.0",
-        "@vitejs/plugin-react": "^4.3.1",
-        "react": "^18.3.1",
-        "react-dom": "^18.3.1"
+        "@tanstack/react-query": "^5.56.2",
+        "date-fns": "^4.1.0"
     }
 }
