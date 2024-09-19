@@ -18,4 +18,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/complaints', [KomplainController::class, 'index'])->name('complaints.index');
+Route::get('/komplain', [KomplainController::class, 'index'])->name('komplain.index');
+Route::get('/komplain/status', [KomplainController::class, 'getKomplaintStatus'])->name('komplain.status');
+Route::get('/komplain/detail-status', [KomplainController::class, 'getDetailStatus']);
