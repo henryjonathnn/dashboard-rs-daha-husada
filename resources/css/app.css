@@ -1,3 +1,130 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: 14px;
+}
+
+body {
+  @apply overflow-x-hidden;
+}
+
+/* Transition settings */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+.ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Main content adjustments */
+main {
+  width: calc(100% - 16rem); /* Sidebar open */
+  margin-left: 16rem; /* Default sidebar width */
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar-collapsed ~ main {
+  width: calc(100% - 4rem); /* Sidebar collapsed */
+}
+
+@media (max-width: 768px) {
+  main {
+    width: 100%; /* Full width on mobile */
+    margin-left: 0;
+    padding-top: 4rem; /* Adjust padding-top for navbar */
+  }
+
+  .navbar {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 50; /* Ensure navbar is above content */
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1028px) {
+  main {
+    padding-top: 4rem; /* Adjust padding-top for navbar */
+    margin-left: 0; /* Ensure margin-left 0 on tablet */
+  }
+}
+
+/* Custom Scrollbar for WebKit Browsers */
+.sidebar::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1); /* Background of the scrollbar track */
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3); /* Color of the scrollbar thumb */
+  border-radius: 4px; /* Rounded corners of the scrollbar thumb */
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5); /* Darker color when hovering */
+}
+
+/* Firefox */
+.sidebar {
+  scrollbar-width: thin; /* Makes the scrollbar thinner */
+  scrollbar-color: rgba(0, 0, 0, 0.3) rgba(0, 0, 0, 0.1); /* Thumb color and track color */
+}
+
+/* Ensure sidebar is scrollable */
+.sidebar {
+  overflow-y: auto; /* Allows vertical scrolling */
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    display: none; /* Hide sidebar on tablet and mobile */
+  }
+}
+
+/* Tooltip styles */
+.tooltip {
+  z-index: 10;
+  text-align: center;
+  white-space: normal;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.tooltip-content {
+  display: inline-block;
+  text-align: left;
+}
+
+.tooltip-arrow {
+  bottom: -8px;
+}
+
+@media (max-width: 768px) {
+  .recharts-cartesian-axis-tick {
+    font-size: 10px; /* Decrease font size for smaller screens */
+  }
+
+  .recharts-cartesian-axis-tick-text {
+    transform: rotate(-30deg); /* Adjust rotation for smaller screens */
+  }
+}

@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-// import AppLayout from './layouts/AppLayout';
+import AppLayout from './layouts/AppLayout';
 
 
 const queryClient = new QueryClient();
@@ -13,9 +13,9 @@ createInertiaApp({
   setup({ el, App, props }) {
     createRoot(el).render(
       <QueryClientProvider client={queryClient}>
-        {/* <AppLayout> */}
+        <AppLayout>
           <App {...props} />
-        {/* </AppLayout> */}
+        </AppLayout>
       </QueryClientProvider>
     );
   },

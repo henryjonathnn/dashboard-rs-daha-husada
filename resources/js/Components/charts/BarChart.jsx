@@ -18,7 +18,6 @@ ChartJS.register(
 );
 
 const BarChart = ({ data, title, label }) => {
-
   const chartData = useMemo(() => {
     if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
       console.error('Invalid or empty data passed to BarChart:', data);
@@ -26,8 +25,7 @@ const BarChart = ({ data, title, label }) => {
     }
 
     const labels = Object.keys(data);
-    const values = labels.map(label => typeof data[label] === 'object' ? data[label].Total : data[label]);
-
+    const values = labels.map(label => data[label].total);
 
     const colors = ['#267db3', '#6dc486', '#fad25e', '#ec6444', '#8561c8', '#1D1E33'];
     const datasetColor = colors.slice(0, labels.length);
