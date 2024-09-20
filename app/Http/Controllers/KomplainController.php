@@ -14,34 +14,39 @@ class KomplainController extends Controller
 {
     private function getDateParameters(Request $request)
     {
-        $availableDates = Cache::remember('available_dates', 120, function () {
-            return Komplain::getAvailableDates();
-        });
-        
-        $latestDate = $availableDates->first();
-        $selectedDate = $request->input(
-            'selectedDate',
-            $latestDate ? "{$latestDate['year']}-{$latestDate['month']}" : Carbon::now()->format('Y-n')
-        );
+        $availableDates = $this->getAvailableDates();
 
-        [$year, $month] = explode('-', $selectedDate);
+        $latestDate = $availableDates->first();
+        $year = $request->input('year', $latestDate ? $latestDate['year'] : Carbon::now()->year);
+        $month = $request->input('month', $latestDate ? $latestDate['month'] : Carbon::now()->month);
 
         return [
-            'year' => $year,
-            'month' => $month,
+            'year' => (int)$year,
+            'month' => (int)$month,
             'availableDates' => $availableDates,
         ];
+    }
+
+    private function getAvailableDates()
+    {
+        return Cache::remember('available_dates', 120, function () {
+            return Komplain::getAvailableDates();
+        });
     }
 
     public function index(Request $request)
     {
         try {
             $params = $this->getDateParameters($request);
-            $complaints = Komplain::getComplaintsByMonthYear($params['month'], $params['year']);
+            $complaints = $this->getComplaints($params['year'], $params['month']);
 
             return Inertia::render('Komplain/Index', [
                 'complaints' => $complaints,
                 'availableDates' => $params['availableDates'],
+                'selectedDate' => [
+                    'year' => $params['year'],
+                    'month' => $params['month']
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Error in KomplainController@index: ' . $e->getMessage());
@@ -53,7 +58,7 @@ class KomplainController extends Controller
     {
         try {
             $params = $this->getDateParameters($request);
-            $complaints = Komplain::getComplaintStats($params['month'], $params['year']);
+            $complaints = $this->getComplaintStats($params['year'], $params['month']);
 
             return response()->json([
                 'totalComplaints' => $complaints['total'],
@@ -62,7 +67,7 @@ class KomplainController extends Controller
                 'statusCount' => $complaints['statusCount'],
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in KomplainController@getComplaintStats: ' . $e->getMessage());
+            Log::error('Error in KomplainController@getKomplainStatus: ' . $e->getMessage());
             return response()->json(['error' => 'An error occurred while fetching complaint statistics.'], 500);
         }
     }
@@ -71,7 +76,7 @@ class KomplainController extends Controller
     {
         try {
             $params = $this->getDateParameters($request);
-            $complaints = Komplain::getDetailedComplaints($params['month'], $params['year']);
+            $complaints = $this->getDetailedComplaints($params['year'], $params['month']);
 
             return response()->json($complaints);
         } catch (\Exception $e) {
@@ -84,16 +89,86 @@ class KomplainController extends Controller
     {
         try {
             $params = $this->getDateParameters($request);
-            $complaints = Komplain::getComplaintsByMonthYear($params['month'], $params['year']);
+            $totalUnitStats = $this->getTotalUnitStats($params['year'], $params['month']);
 
-            $unitCategories = $this->getUnitCategories();
-            $categoryCounts = $this->calculateCategoryCounts($complaints, $unitCategories);
+            if (empty($totalUnitStats)) {
+                return response()->json([
+                    'message' => 'No data available for the selected month and year.',
+                    'data' => []
+                ], 200);
+            }
 
-            return response()->json($categoryCounts);
+            return response()->json($totalUnitStats);
         } catch (\Exception $e) {
             Log::error('Error in KomplainController@getTotalUnit: ' . $e->getMessage());
-            return response()->json(['error' => 'An error occurred while fetching unit totals.'], 500);
+            return response()->json([
+                'error' => 'An error occurred while fetching unit totals.',
+                'message' => $e->getMessage()
+            ], 500);
         }
+    }
+
+    public function getPetugas(Request $request): JsonResponse
+    {
+        try {
+            $params = $this->getDateParameters($request);
+            $petugasStats = $this->getPetugasStats($params['year'], $params['month']);
+
+            return response()->json($petugasStats);
+        } catch (\Exception $e) {
+            Log::error('Error in KomplainController@getPetugas: ' . $e->getMessage());
+            return response()->json(['error' => 'An error occurred while fetching petugas statistics.'], 500);
+        }
+    }
+
+    private function getComplaints($year, $month)
+    {
+        return Cache::remember("complaints_{$year}_{$month}", 60, function () use ($year, $month) {
+            return Komplain::getComplaintsByMonthYear($month, $year);
+        });
+    }
+
+    private function getComplaintStats($year, $month)
+    {
+        return Cache::remember("complaint_stats_{$year}_{$month}", 60, function () use ($year, $month) {
+            return Komplain::getComplaintStats($month, $year);
+        });
+    }
+
+    private function getDetailedComplaints($year, $month)
+    {
+        return Cache::remember("detailed_complaints_{$year}_{$month}", 60, function () use ($year, $month) {
+            return Komplain::getDetailedComplaints($month, $year);
+        });
+    }
+
+    private function getTotalUnitStats($year, $month)
+    {
+        return Cache::remember("total_unit_stats_{$year}_{$month}", 60, function () use ($year, $month) {
+            return Komplain::getTotalUnitStats($month, $year);
+        });
+    }
+
+    private function getPetugasStats($year, $month)
+    {
+        return Cache::remember("petugas_stats_{$year}_{$month}", 60, function () use ($year, $month) {
+            $complaints = Komplain::withFormIdThree()
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->get();
+
+            $petugasStats = [];
+
+            foreach ($complaints as $complaint) {
+                $petugas = $complaint->petugas;
+                if (!empty($petugas)) {
+                    $petugasStats[$petugas] = ($petugasStats[$petugas] ?? 0) + 1;
+                }
+            }
+
+            arsort($petugasStats);
+            return $petugasStats;
+        });
     }
 
     private function formatTimeDiff($seconds): string
@@ -115,54 +190,5 @@ class KomplainController extends Controller
         }
 
         return $result ? implode(' ', $result) : '0 detik';
-    }
-
-    private function getUnitCategories(): array
-    {
-        return [
-            'Unit IGD' => ['Ambulance', 'IGD'],
-            'Unit Rawat Jalan' => [
-                'Klinik Anak', 'Klinik Bedah', 'Klinik Gigi', 'Klinik Jantung',
-                'Klinik Konservasi', 'Klinik Kulit', 'Klinik Kusta', 'Klinik Mata',
-                'Klinik Obgyn', 'Klinik Ortopedy', 'Klinik Penyakit Dalam', 'Klinik TB',
-                'Klinik THT', 'Klinik Umum'
-            ],
-            'Unit Rawat Inap' => ['Irna Atas', 'Irna Bawah', 'IBS', 'VK', 'Perinatology'],
-            'Unit Penunjang Medis' => ['Farmasi', 'Laboratorium', 'Admisi / Rekam Medis', 'Rehab Medik'],
-            'Unit Lainnya' => ['Lainnya']
-        ];
-    }
-
-    private function calculateCategoryCounts($complaints, $unitCategories): array
-    {
-        $categoryCounts = array_fill_keys(array_keys($unitCategories), [
-            'total' => 0,
-            'Terkirim' => 0,
-            'Dalam Pengerjaan' => 0,
-            'Selesai' => 0,
-            'Pending' => 0
-        ]);
-
-        foreach ($complaints as $complaint) {
-            $unit = $complaint['unit'] ?? 'Lainnya';
-            $status = $complaint['status'];
-
-            $categoryFound = false;
-            foreach ($unitCategories as $category => $units) {
-                if (in_array($unit, $units)) {
-                    $categoryCounts[$category]['total']++;
-                    $categoryCounts[$category][$status]++;
-                    $categoryFound = true;
-                    break;
-                }
-            }
-
-            if (!$categoryFound) {
-                $categoryCounts['Unit Lainnya']['total']++;
-                $categoryCounts['Unit Lainnya'][$status]++;
-            }
-        }
-
-        return $categoryCounts;
     }
 }

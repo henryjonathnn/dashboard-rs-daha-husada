@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 
 class Komplain extends Model
 {
@@ -47,36 +46,32 @@ class Komplain extends Model
 
     public static function getComplaintsByMonthYear($month, $year)
     {
-        $cacheKey = "complaints_{$year}_{$month}";
-        return Cache::remember($cacheKey, 60 * 60, function () use ($month, $year) {
-            return self::withFormIdThree()
-                ->whereMonth('created_at', $month)
-                ->whereYear('created_at', $year)
-                ->get()
-                ->map(function ($complaint) {
-                    $extractedData = $complaint->getExtractedData();
-                    $status = $extractedData['status'] ?? 'N/A';
+        return self::withFormIdThree()
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->get()
+            ->map(function ($complaint) {
+                $extractedData = $complaint->getExtractedData();
+                $status = $extractedData['status'] ?? 'N/A';
 
-                    if ($complaint->is_pending == 1 && $status !== 'Selesai') {
-                        $status = 'Pending';
-                    }
+                if ($complaint->is_pending == 1 && $status !== 'Selesai') {
+                    $status = 'Pending';
+                }
 
-                    return [
-                        'id' => $complaint->id,
-                        'json' => $complaint->json,
-                        'datetime_masuk' => $complaint->datetime_masuk,
-                        'datetime_pengerjaan' => $complaint->datetime_pengerjaan,
-                        'datetime_selesai' => $complaint->datetime_selesai,
-                        'petugas' => $complaint->petugas,
-                        'is_pending' => $complaint->is_pending,
-                        'nama_pelapor' => $extractedData['nama_pelapor'] ?? 'N/A',
-                        'unit' => $extractedData['unit'] ?? 'N/A',
-                        'lokasi' => $extractedData['lokasi'] ?? 'N/A',
-                        'status' => $status,
-                        'created_at' => $complaint->created_at->format('Y-m-d H:i:s'),
-                    ];
-                });
-        });
+                return [
+                    'id' => $complaint->id,
+                    'datetime_masuk' => $complaint->datetime_masuk,
+                    'datetime_pengerjaan' => $complaint->datetime_pengerjaan,
+                    'datetime_selesai' => $complaint->datetime_selesai,
+                    'petugas' => $complaint->petugas,
+                    'is_pending' => $complaint->is_pending,
+                    'nama_pelapor' => $extractedData['nama_pelapor'] ?? 'N/A',
+                    'unit' => $extractedData['unit'] ?? 'N/A',
+                    'lokasi' => $extractedData['lokasi'] ?? 'N/A',
+                    'status' => $status,
+                    'created_at' => $complaint->created_at->format('Y-m-d H:i:s'),
+                ];
+            });
     }
 
     public static function getComplaintStats($month, $year)
@@ -84,32 +79,27 @@ class Komplain extends Model
         $complaints = self::getComplaintsByMonthYear($month, $year);
 
         $totalComplaints = $complaints->count();
-        $statusCount = ['Terkirim' => 0, 'Dalam Pengerjaan' => 0, 'Selesai' => 0, 'Pending' => 0];
-        $totalResponseTime = $totalProcessingTime = $countResponseTime = $countProcessingTime = 0;
-
-        foreach ($complaints as $complaint) {
-            $statusCount[$complaint['status']] = ($statusCount[$complaint['status']] ?? 0) + 1;
-
+        $statusCount = $complaints->groupBy('status')->map->count();
+        
+        $timeDiffs = $complaints->reduce(function ($carry, $complaint) {
             if ($complaint['datetime_masuk'] && $complaint['datetime_pengerjaan']) {
-                $totalResponseTime += Carbon::parse($complaint['datetime_masuk'])->diffInSeconds(Carbon::parse($complaint['datetime_pengerjaan']));
-                $countResponseTime++;
+                $carry['response'][] = Carbon::parse($complaint['datetime_masuk'])->diffInSeconds(Carbon::parse($complaint['datetime_pengerjaan']));
             }
-
             if ($complaint['datetime_pengerjaan'] && $complaint['datetime_selesai']) {
-                $totalProcessingTime += Carbon::parse($complaint['datetime_pengerjaan'])->diffInSeconds(Carbon::parse($complaint['datetime_selesai']));
-                $countProcessingTime++;
+                $carry['processing'][] = Carbon::parse($complaint['datetime_pengerjaan'])->diffInSeconds(Carbon::parse($complaint['datetime_selesai']));
             }
-        }
+            return $carry;
+        }, ['response' => [], 'processing' => []]);
 
-        $averageResponseTime = $countResponseTime > 0 ? round($totalResponseTime / $countResponseTime) : 0;
-        $averageProcessingTime = $countProcessingTime > 0 ? round($totalProcessingTime / $countProcessingTime) : 0;
+        $averageResponseTime = !empty($timeDiffs['response']) ? array_sum($timeDiffs['response']) / count($timeDiffs['response']) : 0;
+        $averageProcessingTime = !empty($timeDiffs['processing']) ? array_sum($timeDiffs['processing']) / count($timeDiffs['processing']) : 0;
 
         return [
             'total' => $totalComplaints,
             'statusCount' => $statusCount,
             'averageTimes' => [
-                'responseTime' => $averageResponseTime,
-                'processingTime' => $averageProcessingTime,
+                'responseTime' => round($averageResponseTime),
+                'processingTime' => round($averageProcessingTime),
             ],
         ];
     }
@@ -133,8 +123,60 @@ class Komplain extends Model
                         'Durasi Pengerjaan' => self::formatTimeDiff(Carbon::parse($complaint['datetime_pengerjaan'])->diffInSeconds(Carbon::parse($complaint['datetime_selesai']))),
                     ];
                 });
+            });
+    }
+
+    public static function getTotalUnitStats($month, $year)
+    {
+        $complaints = self::getComplaintsByMonthYear($month, $year);
+
+        $unitCategories = self::getUnitCategories();
+
+        return $complaints->groupBy('unit')
+            ->map(function ($unitComplaints, $unit) use ($unitCategories) {
+                $category = self::getCategoryForUnit($unit, $unitCategories);
+                return [
+                    'category' => $category,
+                    'total' => $unitComplaints->count(),
+                    'statusCount' => $unitComplaints->groupBy('status')->map->count(),
+                ];
             })
-            ->toArray();
+            ->groupBy('category')
+            ->map(function ($categoryComplaints) {
+                return [
+                    'total' => $categoryComplaints->sum('total'),
+                    'Terkirim' => $categoryComplaints->sum('statusCount.Terkirim'),
+                    'Dalam Pengerjaan' => $categoryComplaints->sum('statusCount.Dalam Pengerjaan'),
+                    'Selesai' => $categoryComplaints->sum('statusCount.Selesai'),
+                    'Pending' => $categoryComplaints->sum('statusCount.Pending'),
+                ];
+            });
+    }
+
+    private static function getUnitCategories()
+    {
+        return [
+            'Unit IGD' => ['Ambulance', 'IGD'],
+            'Unit Rawat Jalan' => [
+                'Klinik Anak', 'Klinik Bedah', 'Klinik Gigi', 'Klinik Jantung',
+                'Klinik Konservasi', 'Klinik Kulit', 'Klinik Kusta', 'Klinik Mata',
+                'Klinik Obgyn', 'Klinik Ortopedy', 'Klinik Penyakit Dalam', 'Klinik TB',
+                'Klinik THT', 'Klinik Umum'
+            ],
+            'Unit Rawat Inap' => ['Irna Atas', 'Irna Bawah', 'IBS', 'VK', 'Perinatology'],
+            'Unit Penunjang Medis' => ['Farmasi', 'Laboratorium', 'Admisi / Rekam Medis', 'Rehab Medik'],
+            'Unit Lainnya' => ['Lainnya']
+        ];
+    }
+
+    private static function getCategoryForUnit($unit, $unitCategories)
+    {
+        foreach ($unitCategories as $category => $units) {
+            if (in_array($unit, $units)) {
+                return $category;
+            }
+        }
+        return 'Unit Lainnya';
     }
 
     public function getExtractedData()
@@ -184,19 +226,24 @@ class Komplain extends Model
         return $extractedData;
     }
 
-    private static function formatTimeDiff($seconds): string
+    private static function formatTimeDiff($seconds)
     {
-        $days = floor($seconds / 86400);
-        $hours = floor(($seconds % 86400) / 3600);
-        $minutes = floor(($seconds % 3600) / 60);
-        $seconds = $seconds % 60;
+        $units = [
+            86400 => 'hari',
+            3600 => 'jam',
+            60 => 'menit',
+            1 => 'detik'
+        ];
 
-        $parts = [];
-        if ($days > 0) $parts[] = $days . ' hari';
-        if ($hours > 0) $parts[] = $hours . ' jam';
-        if ($minutes > 0) $parts[] = $minutes . ' menit';
-        if ($seconds > 0) $parts[] = $seconds . ' detik';
+        $result = [];
+        foreach ($units as $unit => $text) {
+            if ($seconds >= $unit) {
+                $quantity = floor($seconds / $unit);
+                $result[] = "$quantity $text";
+                $seconds %= $unit;
+            }
+        }
 
-        return implode(' ', $parts) ?: '0 detik';
+        return $result ? implode(' ', $result) : '0 detik';
     }
 }

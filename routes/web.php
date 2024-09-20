@@ -23,4 +23,4 @@ Route::get('/komplain/status', [KomplainController::class, 'getKomplainStatus'])
 Route::get('/komplain/detail-status', [KomplainController::class, 'getDetailStatus']);
 Route::get('/komplain/total-unit', [KomplainController::class, 'getTotalUnit']);
 // Route::get('/komplain/detail-unit', [KomplainController::class, 'getDetailUnit']);
-// Route::get('/komplain/petugas', [KomplainController::class, 'getPetugas']);
+Route::get('/komplain/petugas', [KomplainController::class, 'getPetugas']);
