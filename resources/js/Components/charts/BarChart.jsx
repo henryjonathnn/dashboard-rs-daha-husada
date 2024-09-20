@@ -25,17 +25,23 @@ const BarChart = ({ data, title, label }) => {
     }
 
     const labels = Object.keys(data);
-    const values = labels.map(label => data[label].total);
+    const values = labels.map(label => {
+      const value = data[label];
+      // Check if the value is a number or an object with a 'total' property
+      return typeof value === 'number' ? value : (value && value.total) || 0;
+    });
 
     const colors = ['#267db3', '#6dc486', '#fad25e', '#ec6444', '#8561c8', '#1D1E33'];
-    const datasetColor = colors.slice(0, labels.length);
+
+    // Create a color map for consistency
+    const colorMap = new Map(labels.map((label, index) => [label, colors[index % colors.length]]));
 
     return {
       labels,
       datasets: [{
         label: label || 'Total',
         data: values,
-        backgroundColor: datasetColor,
+        backgroundColor: labels.map(label => colorMap.get(label)),
       }]
     };
   }, [data, label]);
