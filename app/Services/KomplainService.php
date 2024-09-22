@@ -131,7 +131,7 @@ class KomplainService
         return Cache::remember("total_unit_stats_{$year}_{$month}", 60, function () use ($year, $month) {
             $complaints = Komplain::getComplaintsByMonthYear($month, $year);
             $unitCategories = Komplain::getUnitCategories();
-
+    
             return $complaints->groupBy('unit')
                 ->map(function ($unitComplaints, $unit) use ($unitCategories) {
                     $category = $this->getCategoryForUnit($unit, $unitCategories);
@@ -159,35 +159,43 @@ class KomplainService
         return Cache::remember("detailed_unit_stats_{$year}_{$month}", 60, function () use ($year, $month) {
             $complaints = Komplain::getComplaintsByMonthYear($month, $year);
             $unitCategories = Komplain::getUnitCategories();
-
+    
             $detailedStats = collect($unitCategories)->mapWithKeys(function ($units, $category) {
-                return [$category => []];
+                return [$category => collect()];
             });
-
+    
             foreach ($complaints as $complaint) {
                 $unit = $complaint['unit'];
                 $category = $this->getCategoryForUnit($unit, $unitCategories);
                 $status = $complaint['status'];
-
+    
                 if ($category === 'Unit Lainnya') {
                     $unit = 'Lainnya';
                 }
-
-                if (!isset($detailedStats[$category][$unit])) {
-                    $detailedStats[$category][$unit] = [
+    
+                $detailedStats[$category] = $detailedStats[$category]->pipe(function ($categoryCollection) use ($unit, $status) {
+                    $unitStats = $categoryCollection->get($unit, [
                         'Total' => 0,
                         'Terkirim' => 0,
                         'Dalam Pengerjaan' => 0,
                         'Selesai' => 0,
                         'Pending' => 0,
-                    ];
-                }
-
-                $detailedStats[$category][$unit]['Total']++;
-                $detailedStats[$category][$unit][$status]++;
+                    ]);
+    
+                    $unitStats['Total']++;
+                    $unitStats[$status]++;
+    
+                    return $categoryCollection->put($unit, $unitStats);
+                });
             }
-
-            return $detailedStats->filter->isNotEmpty();
+    
+            return $detailedStats->map(function ($category) {
+                return $category->filter(function ($unit) {
+                    return $unit['Total'] > 0;
+                });
+            })->filter(function ($category) {
+                return $category->isNotEmpty();
+            });
         });
     }
 
