@@ -20,6 +20,12 @@ class Komplain extends Model
 
     protected static $unitCategories;
 
+    private static $indonesianMonths = [
+        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+    ];
+
     public function scopeWithFormId($query, $formId)
     {
         return $query->where('form_id', $formId);
@@ -37,7 +43,7 @@ class Komplain extends Model
                     return [
                         'year' => $date->year,
                         'month' => $date->month,
-                        'monthName' => Carbon::create()->month($date->month)->format('F')
+                        'monthName' => self::$indonesianMonths[$date->month]
                     ];
                 });
         });

@@ -52,29 +52,29 @@ class KomplainService
 
     public function getMonthOptions()
     {
-        return [
-            ['value' => 1, 'label' => 'Januari'],
-            ['value' => 2, 'label' => 'Februari'],
-            ['value' => 3, 'label' => 'Maret'],
-            ['value' => 4, 'label' => 'April'],
-            ['value' => 5, 'label' => 'Mei'],
-            ['value' => 6, 'label' => 'Juni'],
-            ['value' => 7, 'label' => 'Juli'],
-            ['value' => 8, 'label' => 'Agustus'],
-            ['value' => 9, 'label' => 'September'],
-            ['value' => 10, 'label' => 'Oktober'],
-            ['value' => 11, 'label' => 'November'],
-            ['value' => 12, 'label' => 'Desember'],
-        ];
+        return Komplain::getAvailableDates($this->formId)
+            ->pluck('month', 'monthName')
+            ->unique()
+            ->map(function ($month, $monthName) {
+                return [
+                    'value' => $month,
+                    'label' => $monthName
+                ];
+            })
+            ->sortBy('value')
+            ->values();
     }
 
     public function getYearOptions()
     {
-        $currentYear = Carbon::now()->year;
-        $years = range($currentYear - 5, $currentYear);
-        return array_map(function($year) {
-            return ['value' => $year, 'label' => (string)$year];
-        }, $years);
+        return Komplain::getAvailableDates($this->formId)
+            ->pluck('year')
+            ->unique()
+            ->map(function ($year) {
+                return ['value' => $year, 'label' => (string)$year];
+            })
+            ->sortByDesc('value')
+            ->values();
     }
 
     public function getComplaintStats($year, $month)
@@ -293,8 +293,7 @@ class KomplainService
         $times = [
             86400 => 'hari',
             3600 => 'jam',
-            60 => 'menit',
-            1 => 'detik'
+            60 => 'menit'
         ];
 
         $result = [];
@@ -306,6 +305,6 @@ class KomplainService
             }
         }
 
-        return $result ? implode(' ', $result) : '0 detik';
+        return $result ? implode(' ', $result) : '0 menit';
     }
 }
