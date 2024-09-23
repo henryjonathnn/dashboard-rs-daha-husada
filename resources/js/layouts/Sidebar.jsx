@@ -11,8 +11,40 @@ export default function Sidebar({ collapsed, setCollapsed }) {
   const [activeLink, setActiveLink] = useState('');
 
   useEffect(() => {
-    setActiveLink(window.location.pathname);
+    // Set the active link on initial load from localStorage
+    const savedActiveLink = localStorage.getItem('activeLink');
+    if (savedActiveLink) {
+      setActiveLink(savedActiveLink);
+    }
+
+    // Retrieve the open submenu from localStorage on load
+    const savedMenu = localStorage.getItem('openMenu');
+    if (savedMenu) {
+      setOpenMenu(savedMenu);
+    }
+
+    // Check if the active link is in a submenu, and if so, open that submenu
+    const parentMenu = Object.keys(subMenuItems).find(menu => 
+      subMenuItems[menu].some(item => item.link === savedActiveLink)
+    );
+
+    if (parentMenu) {
+      setOpenMenu(parentMenu);
+    }
   }, []);
+
+  const handleMenuToggle = (menuItemLink) => {
+    const newMenuState = openMenu === menuItemLink ? '' : menuItemLink;
+    setOpenMenu(newMenuState);
+
+    // Save the open submenu state to localStorage
+    localStorage.setItem('openMenu', newMenuState);
+  };
+
+  const handleLinkClick = (link) => {
+    setActiveLink(link);
+    localStorage.setItem('activeLink', link); // Save the active link to localStorage
+  };
 
   const mainMenuItems = [
     { name: 'Dashboard', icon: <FaChartPie />, link: '/' },
@@ -79,14 +111,14 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             <div className={`flex items-center w-full font-medium transition-all duration-300 ease-in-out
               ${activeLink === menuItem.link ? 'bg-light-green text-white' : 'text-gray-600 hover:bg-gray-100'}
               ${collapsed ? 'justify-center' : ''}`}>
-              <Link href={menuItem.link} className={`flex items-center w-full px-4 py-3 ${menuItem.isTwoLines ? 'h-16' : 'h-12'}`} onClick={() => setActiveLink(menuItem.link)}>
+              <Link href={menuItem.link} className={`flex items-center w-full px-4 py-3 ${menuItem.isTwoLines ? 'h-16' : 'h-12'}`} onClick={() => handleLinkClick(menuItem.link)}>
                 {renderMenuItemContent(menuItem)}
               </Link>
               {subMenuItems[menuItem.link] && (
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    setOpenMenu(openMenu === menuItem.link ? '' : menuItem.link);
+                    handleMenuToggle(menuItem.link);
                   }}
                   className={`p-3 text-current hover:bg-transparent transition-colors duration-300 ease-in-out ${collapsed ? 'hidden' : ''}`}
                 >
@@ -96,7 +128,12 @@ export default function Sidebar({ collapsed, setCollapsed }) {
             </div>
             <div className={`overflow-hidden transition-all duration-300 ease-in-out ${openMenu === menuItem.link ? 'max-h-40' : 'max-h-0'}`}>
               {subMenuItems[menuItem.link]?.map((item, index) => (
-                <Link href={item.link} key={index} className={`flex items-center px-8 py-2 text-gray-600 hover:bg-gray-100 transition-colors duration-300 ease-in-out ${activeLink === item.link ? 'bg-light-green text-white' : ''}`}>
+                <Link
+                  href={item.link}
+                  key={index}
+                  className={`flex items-center px-8 py-2 text-gray-600 hover:bg-gray-100 transition-colors duration-300 ease-in-out ${activeLink === item.link ? 'bg-light-green text-white' : ''}`}
+                  onClick={() => handleLinkClick(item.link)}
+                >
                   <div className={`flex-shrink-0 ${collapsed ? 'mr-0' : 'mr-3'}`}>
                     {item.icon}
                   </div>
