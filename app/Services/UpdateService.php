@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 
-class KomplainService
+class UpdateService
 {
     private const PETUGAS_LIST = ['Ganang', 'Agus', 'Ali Muhson', 'Virgie', 'Bayu', 'Adika Wicaksana'];
     private const PETUGAS_REPLACEMENTS = [
@@ -30,7 +30,7 @@ class KomplainService
 
     private $formId;
 
-    public function __construct($formId = 3)
+    public function __construct($formId = 4)
     {
         $this->formId = $formId;
     }
@@ -72,19 +72,39 @@ class KomplainService
     {
         $currentYear = Carbon::now()->year;
         $years = range($currentYear - 5, $currentYear);
-        return array_map(function($year) {
+        return array_map(function ($year) {
             return ['value' => $year, 'label' => (string)$year];
         }, $years);
     }
 
-    public function getComplaintStats($year, $month)
+    public function getDailyUpdateRequests($year, $month)
     {
-        return Cache::remember("complaint_stats_{$this->formId}_{$year}_{$month}", 60, function () use ($year, $month) {
+        return Cache::remember("daily_update_requests_{$year}_{$month}", 60, function () use ($year, $month) {
+            $complaints = Komplain::withFormId($this->formId)
+                ->whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->get();
+
+            $daysInMonth = Carbon::create($year, $month)->daysInMonth;
+            $dailyRequests = array_fill(1, $daysInMonth, 0);
+
+            foreach ($complaints as $complaint) {
+                $day = $complaint->created_at->day;
+                $dailyRequests[$day]++;
+            }
+
+            return $dailyRequests;
+        });
+    }
+
+    public function getUpdateStats($year, $month)
+    {
+        return Cache::remember("update_stats_{$this->formId}_{$year}_{$month}", 60, function () use ($year, $month) {
             $complaints = Komplain::getComplaintsByMonthYear($month, $year, $this->formId);
-            
+
             $totalComplaints = $complaints->count();
             $statusCount = $complaints->groupBy('status')->map->count();
-            
+
             $timeDiffs = $complaints->reduce(function ($carry, $complaint) {
                 if ($complaint['datetime_masuk'] && $complaint['datetime_pengerjaan']) {
                     $carry['response'][] = Carbon::parse($complaint['datetime_masuk'])->diffInSeconds(Carbon::parse($complaint['datetime_pengerjaan']));
@@ -109,9 +129,9 @@ class KomplainService
         });
     }
 
-    public function getDetailedComplaints($year, $month)
+    public function getDetailedUpdate($year, $month)
     {
-        return Cache::remember("detailed_complaints_{$this->formId}_{$year}_{$month}", 60, function () use ($year, $month) {
+        return Cache::remember("detailed_update_{$this->formId}_{$year}_{$month}", 60, function () use ($year, $month) {
             $complaints = Komplain::getComplaintsByMonthYear($month, $year, $this->formId);
 
             return $complaints->groupBy('status')
@@ -133,82 +153,10 @@ class KomplainService
         });
     }
 
-    public function getTotalUnitStats($year, $month)
-    {
-        return Cache::remember("total_unit_stats_{$this->formId}_{$year}_{$month}", 60, function () use ($year, $month) {
-            $complaints = Komplain::getComplaintsByMonthYear($month, $year, $this->formId);
-            $unitCategories = Komplain::getUnitCategories();
-    
-            return $complaints->groupBy('unit')
-                ->map(function ($unitComplaints, $unit) use ($unitCategories) {
-                    $category = $this->getCategoryForUnit($unit, $unitCategories);
-                    return [
-                        'category' => $category,
-                        'total' => $unitComplaints->count(),
-                        'statusCount' => $unitComplaints->groupBy('status')->map->count(),
-                    ];
-                })
-                ->groupBy('category')
-                ->map(function ($categoryComplaints) {
-                    return [
-                        'total' => $categoryComplaints->sum('total'),
-                        'Terkirim' => $categoryComplaints->sum('statusCount.Terkirim'),
-                        'Dalam Pengerjaan' => $categoryComplaints->sum('statusCount.Dalam Pengerjaan'),
-                        'Selesai' => $categoryComplaints->sum('statusCount.Selesai'),
-                        'Pending' => $categoryComplaints->sum('statusCount.Pending'),
-                    ];
-                });
-        });
-    }
 
-    public function getDetailedUnitStats($year, $month)
+    public function getPetugasUpdateStats($year, $month)
     {
-        return Cache::remember("detailed_unit_stats_{$this->formId}_{$year}_{$month}", 60, function () use ($year, $month) {
-            $complaints = Komplain::getComplaintsByMonthYear($month, $year, $this->formId);
-            $unitCategories = Komplain::getUnitCategories();
-    
-            $detailedStats = collect($unitCategories)->mapWithKeys(function ($units, $category) {
-                return [$category => collect()];
-            });
-    
-            foreach ($complaints as $complaint) {
-                $unit = $complaint['unit'];
-                $category = $this->getCategoryForUnit($unit, $unitCategories);
-                $status = $complaint['status'];
-    
-                if ($category === 'Unit Lainnya') {
-                    $unit = 'Lainnya';
-                }
-    
-                $detailedStats[$category] = $detailedStats[$category]->pipe(function ($categoryCollection) use ($unit, $status) {
-                    $unitStats = $categoryCollection->get($unit, [
-                        'Total' => 0,
-                        'Terkirim' => 0,
-                        'Dalam Pengerjaan' => 0,
-                        'Selesai' => 0,
-                        'Pending' => 0,
-                    ]);
-    
-                    $unitStats['Total']++;
-                    $unitStats[$status]++;
-    
-                    return $categoryCollection->put($unit, $unitStats);
-                });
-            }
-    
-            return $detailedStats->map(function ($category) {
-                return $category->filter(function ($unit) {
-                    return $unit['Total'] > 0;
-                });
-            })->filter(function ($category) {
-                return $category->isNotEmpty();
-            });
-        });
-    }
-
-    public function getPetugasStats($year, $month)
-    {
-        return Cache::remember("petugas_stats_{$this->formId}_{$year}_{$month}", 60, function () use ($year, $month) {
+        return Cache::remember("petugas_update_stats_{$this->formId}_{$year}_{$month}", 60, function () use ($year, $month) {
             $complaints = Komplain::withFormId($this->formId)
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
@@ -230,15 +178,6 @@ class KomplainService
         });
     }
 
-    private function getCategoryForUnit($unit, $unitCategories)
-    {
-        foreach ($unitCategories as $category => $units) {
-            if (in_array($unit, $units)) {
-                return $category;
-            }
-        }
-        return 'Unit Lainnya';
-    }
 
     private function normalizePetugasNames($petugas)
     {

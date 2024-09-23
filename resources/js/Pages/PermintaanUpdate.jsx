@@ -6,17 +6,18 @@ import { FaTools, FaCheckCircle } from "react-icons/fa";
 import { MdPendingActions, MdOutlineAccessTimeFilled } from "react-icons/md";
 import Selector from '../Components/ui/Selector';
 import BarChart from '@/Components/charts/BarChart';
+import LineChart from '@/Components/charts/LineChart';
 import Modal from '@/Components/ui/Modal';
 
-const Komplain = () => {
-  const { data_bulan, data_tahun, totalData, totalStatus, totalUnit, detailStatus, selectedMonth, selectedYear } = usePage().props;
+const PermintaanUpdate = () => {
+  const { data_bulan, data_tahun, totalData, totalStatus, detailStatus, selectedMonth, selectedYear, dailyRequests } = usePage().props;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState([]);
   const [modalTitle, setModalTitle] = useState('');
 
   const handleSelectionChange = useCallback(({ month, year }) => {
-    router.get('/komplain', { month, year }, {
+    router.get('/permintaan-update', { month, year }, {
       preserveState: true,
       preserveScroll: true,
     });
@@ -41,7 +42,6 @@ const Komplain = () => {
         detailData = {};
     }
 
-    console.log('Modal Data:', detailData); // Debug log
     setModalData(detailData);
     setModalTitle({
       terkirim: 'Detail Data Menunggu',
@@ -60,6 +60,13 @@ const Komplain = () => {
     { name: 'Respon Time', icon: <MdOutlineAccessTimeFilled />, bgColor: 'bg-orange-300', value: totalData.respon_time || 'N/A', hasDetail: false, tooltipText: 'Rata-rata waktu respon untuk menangani komplain.' },
     { name: 'Durasi Pengerjaan', icon: <MdOutlineAccessTimeFilled />, bgColor: 'bg-violet-300', value: totalData.durasi_pengerjaan || 'N/A', hasDetail: false, tooltipText: 'Rata-rata durasi waktu pengerjaan untuk menyelesaikan komplain.' },
   ], [totalStatus, totalData]);
+
+  const chartData = useMemo(() => {
+    return Object.entries(dailyRequests).map(([day, count]) => ({
+      tanggal: `${day}/${selectedMonth}`,
+      total: count
+    }));
+  }, [dailyRequests, selectedMonth]);
 
   return (
     <div className="py-2">
@@ -86,13 +93,13 @@ const Komplain = () => {
               ))}
             </div>
 
-            {totalUnit && Object.keys(totalUnit).length > 0 && (
-              <BarChart
-                data={totalUnit}
-                title="Total Komplain Per Unit"
-                label="Total Komplain"
+            <div className='bg-white mt-14 rounded-md p-3 shadow-lg'>
+              <LineChart 
+                data={chartData}
+                title={`Jumlah Permintaan Update Harian - ${data_bulan.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
+                label="Jumlah Permintaan"
               />
-            )}
+            </div>
 
             <Modal
               isOpen={modalOpen}
@@ -107,4 +114,4 @@ const Komplain = () => {
   );
 };
 
-export default React.memo(Komplain);
+export default React.memo(PermintaanUpdate);

@@ -20,15 +20,15 @@ class Komplain extends Model
 
     protected static $unitCategories;
 
-    public function scopeWithFormIdThree($query)
+    public function scopeWithFormId($query, $formId)
     {
-        return $query->where('form_id', 3);
+        return $query->where('form_id', $formId);
     }
 
-    public static function getAvailableDates()
+    public static function getAvailableDates($formId)
     {
-        return Cache::remember('available_dates', 1440, function () {
-            return self::withFormIdThree()
+        return Cache::remember('available_dates', 120, function () use ($formId) {
+            return self::withFormId($formId)
                 ->select(DB::raw('DISTINCT YEAR(created_at) as year, MONTH(created_at) as month'))
                 ->orderByDesc('year')
                 ->orderByDesc('month')
@@ -43,10 +43,10 @@ class Komplain extends Model
         });
     }
 
-    public static function getComplaintsByMonthYear($month, $year)
+    public static function getComplaintsByMonthYear($month, $year, $formId)
     {
-        return Cache::remember("complaints_{$year}_{$month}", 60, function () use ($month, $year) {
-            return self::withFormIdThree()
+        return Cache::remember("complaints_{$formId}_{$year}_{$month}", 60, function () use ($month, $year, $formId) {
+            return self::withFormId($formId)
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->get()
