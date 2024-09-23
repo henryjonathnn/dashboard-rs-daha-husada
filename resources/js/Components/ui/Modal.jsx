@@ -9,6 +9,7 @@ const Modal = ({ isOpen, onClose, data, title, service }) => {
         <p><strong>ID:</strong> {item.ID}</p>
         <p><strong>Pelapor:</strong> {item.Pelapor || 'N/A'}</p>
         <p><strong>Petugas:</strong> {item.Petugas || 'Belum ada'}</p>
+        <p><strong>Pesan:</strong> {item.Pesan || 'Belum ada'}</p>
         <p><strong>Waktu Masuk:</strong> {item['Waktu Masuk']}</p>
       </>
     );
@@ -19,7 +20,7 @@ const Modal = ({ isOpen, onClose, data, title, service }) => {
         {item['Waktu Pengerjaan'] && (
           <>
             <p><strong>Waktu Pengerjaan:</strong> {item['Waktu Pengerjaan']}</p>
-            <p><strong>Waktu Selesai:</strong> {item['Waktu Selesai'] || 'N/A'}</p>
+            <p><strong>Waktu Selesai:</strong> {item['Waktu Selesai'] || 'Belum ada'}</p>
             <p><strong>Respon Time:</strong> {item['Respon Time']}</p>
           </>
         )}
@@ -31,8 +32,7 @@ const Modal = ({ isOpen, onClose, data, title, service }) => {
 
     const updateFields = (
       <>
-        <p><strong>Deskripsi:</strong> {item.Deskripsi || 'N/A'}</p>
-        <p><strong>Status:</strong> {item.Status || 'N/A'}</p>
+      {item.Lokasi && <p><strong>Lokasi:</strong> {item.Lokasi}</p>}
         {item['Waktu Mulai'] && <p><strong>Waktu Mulai:</strong> {item['Waktu Mulai']}</p>}
         {item['Waktu Selesai'] && <p><strong>Waktu Selesai:</strong> {item['Waktu Selesai']}</p>}
       </>

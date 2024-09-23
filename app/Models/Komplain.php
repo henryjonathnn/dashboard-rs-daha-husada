@@ -74,6 +74,7 @@ class Komplain extends Model
                         'nama_pelapor' => $extractedData['nama_pelapor'] ?? 'N/A',
                         'unit' => $extractedData['unit'] ?? 'N/A',
                         'lokasi' => $extractedData['lokasi'] ?? 'N/A',
+                        'pesan' => $extractedData['pesan'] ?? 'N/A',
                         'status' => $status === 'Dalam Pengerjaan / Pengecekan Petugas' ? 'Dalam Pengerjaan' : $status,
                         'original_status' => $status,
                         'created_at' => $complaint->created_at->format('Y-m-d H:i:s'),
@@ -87,6 +88,7 @@ class Komplain extends Model
         static $fieldMap = [
             'text-1709615631557-0' => 'nama_pelapor',
             'text-1709615712000-0' => 'lokasi',
+            'textarea-1709615813383-0' => 'pesan',
             'Status' => 'status',
             'is_pending' => 'is_pending',
         ];

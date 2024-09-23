@@ -142,6 +142,7 @@ class UpdateService
                             'Pelapor' => $complaint['nama_pelapor'],
                             'Petugas' => $complaint['petugas'],
                             'Lokasi' => $complaint['lokasi'],
+                            'Pesan' => $complaint['pesan'],
                             'Waktu Masuk' => $complaint['datetime_masuk'],
                             'Waktu Pengerjaan' => $complaint['datetime_pengerjaan'],
                             'Waktu Selesai' => $complaint['datetime_selesai'],
