@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KomplainController;
 use App\Http\Controllers\UpdateController;
 use Illuminate\Support\Facades\Route;
@@ -15,9 +16,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::get('/komplain', [KomplainController::class, 'index']);
 Route::get('/komplain/data-unit', [KomplainController::class, 'dataUnit']);

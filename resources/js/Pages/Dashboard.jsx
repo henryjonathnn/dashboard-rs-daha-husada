@@ -16,6 +16,7 @@ const Dashboard = () => {
     const [modalOpen, setModalOpen] = useState(false);
     const [modalData, setModalData] = useState([]);
     const [modalTitle, setModalTitle] = useState('');
+    const [currentService, setCurrentService] = useState('');
 
     const handleSelectionChange = useCallback(({ month, year }) => {
         setMonth(month);
@@ -26,71 +27,30 @@ const Dashboard = () => {
         });
     }, []);
 
-    const openModal = useCallback((data, type, prefix) => {
-        let detailData;
-        if (prefix === 'Komplain') {
-            switch (type) {
-                case 'Terkirim':
-                    detailData = data.detailStatus?.detail_data_terkirim || [];
-                    break;
-                case 'proses':
-                    detailData = data.detailStatus?.detail_data_proses || [];
-                    break;
-                case 'Selesai':
-                    detailData = data.detailStatus?.detail_data_selesai || [];
-                    break;
-                case 'Pending':
-                    detailData = data.detailStatus?.detail_data_pending || [];
-                    break;
-                default:
-                    detailData = [];
-            }
-        } else if (prefix === 'Permintaan Update') {
-            switch (type) {
-                case 'Terkirim':
-                    detailData = data.detailStatus?.detail_data_terkirim || [];
-                    break;
-                case 'proses':
-                    detailData = data.detailStatus?.detail_data_proses || [];
-                    break;
-                case 'Selesai':
-                    detailData = data.detailStatus?.detail_data_selesai || [];
-                    break;
-                case 'Pending':
-                    detailData = data.detailStatus?.detail_data_pending || [];
-                    break;
-                default:
-                    detailData = [];
-            }
-        }
+    const openModal = useCallback((data, type, prefix, service) => {
+        let detailData = data.detailStatus?.[type] || [];
 
-        if (detailData && detailData.length > 0) {
+        if (detailData.length > 0) {
             setModalData(detailData);
-            setModalTitle({
-                terkirim: 'Detail Data Menunggu',
-                proses: 'Detail Data Proses',
-                pending: 'Detail Data Pending',
-                selesai: 'Detail Data Selesai',
-              }[type] || `Detail Data ${type.charAt(0).toUpperCase() + type.slice(1)}`);
-          
+            setModalTitle(`Detail Data ${type.charAt(0).toUpperCase() + type.slice(1)} - ${prefix}`);
+            setCurrentService(service);
             setModalOpen(true);
         } else {
             console.log(`No detail data available for ${prefix} ${type}`);
-            // You might want to show a message to the user here
         }
     }, []);
 
-    const createCards = (data, prefix) => [
+    const createCards = (data, prefix, service) => [
         { name: 'Menunggu', icon: <IoSendSharp />, bgColor: 'bg-sky-200', value: data.totalStatus?.['Terkirim'] || 0, hasDetail: true, detailType: 'Terkirim', tooltipText: `Jumlah ${prefix} yang terkirim, namun belum diproses oleh tim IT.` },
-        { name: 'Proses', icon: <FaTools />, bgColor: 'bg-yellow-200', value: data.totalStatus?.['Dalam Pengerjaan / Pengecekan Petugas'] || 0, hasDetail: true, detailType: 'proses', tooltipText: `Jumlah ${prefix} yang sedang diproses oleh tim IT.` },
+        { name: 'Proses', icon: <FaTools />, bgColor: 'bg-yellow-200', value: data.totalStatus?.['Dalam Pengerjaan'] || 0, hasDetail: true, detailType: 'Dalam Pengerjaan', tooltipText: `Jumlah ${prefix} yang sedang diproses oleh tim IT.` },
         { name: 'Selesai', icon: <FaCheckCircle />, bgColor: 'bg-green', value: data.totalStatus?.['Selesai'] || 0, hasDetail: true, detailType: 'Selesai', tooltipText: `Jumlah ${prefix} yang sudah berhasil diselesaikan.` },
         { name: 'Pending', icon: <MdPendingActions />, bgColor: 'bg-slate-200', value: data.totalStatus?.['Pending'] || 0, hasDetail: true, detailType: 'Pending', tooltipText: `Jumlah ${prefix} yang ditunda.` },
         { name: 'Respon Time', icon: <MdOutlineAccessTimeFilled />, bgColor: 'bg-orange-200', value: data.totalData?.respon_time || 'N/A', hasDetail: false, tooltipText: `Rata-rata waktu respon untuk menangani ${prefix}.` },
-        { name: 'Durasi Pengerjaan', icon: <MdOutlineAccessTimeFilled />, bgColor: 'bg-violet-200', value: data.totalData?.durasi_pengerjaan || 'N/A', hasDetail: false, tooltipText: `Rata-rata durasi waktu pengerjaan untuk menyelesaikan ${prefix}.` },
-    ];
+{ name: 'Durasi Pengerjaan', icon: <MdOutlineAccessTimeFilled />, bgColor: 'bg-violet-200', value: data.totalData?.durasi_pengerjaan || 'N/A', hasDetail: false, tooltipText: `Rata-rata durasi waktu pengerjaan untuk menyelesaikan ${prefix}.` },
+    ].map(card => ({ ...card, service }));
 
-    const komplainCards = createCards(komplainData, 'komplain');
-    const updateCards = createCards(updateData, 'permintaan update');
+    const komplainCards = createCards(komplainData, 'komplain', 'komplain');
+    const updateCards = createCards(updateData, 'permintaan update', 'update');
 
     return (
         <div className="py-2">
@@ -105,7 +65,7 @@ const Dashboard = () => {
                             selectedMonth={month}
                             selectedYear={year}
                         />
-                        
+
                         <h2 className="text-xl font-bold mb-4 mt-8">Komplain IT</h2>
                         <h3 className='text-base lg:text-lg font-bold text-white mb-4'>
                             <span className='bg-light-green py-2 px-3 rounded'>
@@ -114,10 +74,10 @@ const Dashboard = () => {
                         </h3>
                         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8'>
                             {komplainCards.map((card, index) => (
-                                <Card 
-                                    key={`komplain-${index}`} 
-                                    {...card} 
-                                    onClick={card.hasDetail ? () => openModal(komplainData, card.detailType, 'Komplain') : undefined}
+                                <Card
+                                    key={`komplain-${index}`}
+                                    {...card}
+                                    onClick={card.hasDetail ? () => openModal(komplainData, card.detailType, 'Komplain', 'komplain') : undefined}
                                 />
                             ))}
                         </div>
@@ -125,15 +85,15 @@ const Dashboard = () => {
                         <h2 className="text-xl font-bold mb-4 mt-12">Permintaan Update IT</h2>
                         <h3 className='text-base lg:text-lg font-bold text-white mb-4'>
                             <span className='bg-light-green py-2 px-3 rounded'>
-                                {`Total Permintaan: ${updateData.totalData?.total_permintaan || 0}`}
+                                {`Total Permintaan: ${updateData.totalData?.total_update || 0}`}
                             </span>
                         </h3>
                         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4'>
                             {updateCards.map((card, index) => (
-                                <Card 
-                                    key={`update-${index}`} 
-                                    {...card} 
-                                    onClick={card.hasDetail ? () => openModal(updateData, card.detailType, 'Permintaan Update') : undefined}
+                                <Card
+                                    key={`update-${index}`}
+                                    {...card}
+                                    onClick={card.hasDetail ? () => openModal(updateData, card.detailType, 'Permintaan Update', 'update') : undefined}
                                 />
                             ))}
                         </div>
@@ -144,6 +104,7 @@ const Dashboard = () => {
                                 onClose={() => setModalOpen(false)}
                                 data={modalData}
                                 title={modalTitle}
+                                service={currentService}
                             />
                         </Suspense>
                     </div>
