@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\KomplainService;
 use App\Services\UpdateService;
 use Inertia\Inertia;
+use App\Models\Komplain;
 
 class DashboardController extends Controller
 {
@@ -27,6 +28,15 @@ class DashboardController extends Controller
         $month = $komplainParams['month'];
 
         $komplainStats = $this->komplainService->getComplaintStats($year, $month);
+        $updateStats = $this->updateService->getUpdateStats($year, $month);
+
+        $lastKomplainEntry = Komplain::where('form_id', 3)
+            ->orderBy('datetime_masuk', 'desc')
+            ->first();
+
+        $lastUpdateEntry = Komplain::where('form_id', 4)
+            ->orderBy('datetime_masuk', 'desc')
+            ->first();
 
         $komplainData = [
             'totalData' => [
@@ -38,9 +48,8 @@ class DashboardController extends Controller
             'detailStatus' => $this->komplainService->getDetailedComplaints($year, $month),
             'data_bulan' => $this->komplainService->getMonthOptions(),
             'data_tahun' => $this->komplainService->getYearOptions(),
+            'lastUpdateTime' => $lastKomplainEntry ? $lastKomplainEntry->datetime_masuk : null,
         ];
-
-        $updateStats = $this->updateService->getUpdateStats($year, $month);
 
         $updateData = [
             'totalData' => [
@@ -50,6 +59,7 @@ class DashboardController extends Controller
             ],
             'totalStatus' => $updateStats['statusCount'],
             'detailStatus' => $this->updateService->getDetailedUpdate($year, $month),
+            'lastUpdateTime' => $lastUpdateEntry ? $lastUpdateEntry->datetime_masuk : null,
         ];
 
         return Inertia::render('Dashboard', [

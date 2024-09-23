@@ -8,9 +8,10 @@ import Selector from '../Components/ui/Selector';
 import BarChart from '@/Components/charts/BarChart';
 import LineChart from '@/Components/charts/LineChart';
 import Modal from '@/Components/ui/Modal';
+import Label from '../Components/ui/Label';
 
 const PermintaanUpdate = () => {
-  const { data_bulan, data_tahun, totalData, totalStatus, detailStatus, selectedMonth, selectedYear, dailyRequests } = usePage().props;
+  const { data_bulan, data_tahun, totalData, totalStatus, detailStatus, selectedMonth, selectedYear, dailyRequests, lastUpdateTime } = usePage().props;
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState([]);
@@ -81,7 +82,8 @@ const PermintaanUpdate = () => {
               selectedMonth={selectedMonth}
               selectedYear={selectedYear}
             />
-            <h3 className='text-base lg:text-lg font-bold text-white mb-4'>
+            <Label lastUpdateTime={lastUpdateTime} />
+            <h3 className='text-base lg:text-lg font-bold text-white mb-2'>
               <span className='bg-light-green py-2 px-3 rounded'>
                 {`Total Komplain: ${totalData.total_komplain || 0}`}
               </span>

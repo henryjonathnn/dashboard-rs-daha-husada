@@ -5,6 +5,7 @@ import Selector from '@/Components/ui/Selector';
 import { IoSendSharp } from "react-icons/io5";
 import { FaTools, FaCheckCircle } from "react-icons/fa";
 import { MdPendingActions, MdOutlineAccessTimeFilled } from "react-icons/md";
+import Label from '../Components/ui/Label';
 
 const Modal = lazy(() => import('@/Components/ui/Modal'));
 
@@ -14,7 +15,7 @@ const Dashboard = () => {
     const [month, setMonth] = useState(selectedMonth);
     const [year, setYear] = useState(selectedYear);
     const [modalOpen, setModalOpen] = useState(false);
-    const [modalData, setModalData] = useState([]);
+    const [modalData, setModalData] = useState({});
     const [modalTitle, setModalTitle] = useState('');
     const [currentService, setCurrentService] = useState('');
 
@@ -31,7 +32,7 @@ const Dashboard = () => {
         let detailData = data.detailStatus?.[type] || [];
 
         if (detailData.length > 0) {
-            setModalData(detailData);
+            setModalData({ [type]: detailData });
             setModalTitle(`Detail Data ${type.charAt(0).toUpperCase() + type.slice(1)} - ${prefix}`);
             setCurrentService(service);
             setModalOpen(true);
@@ -46,7 +47,7 @@ const Dashboard = () => {
         { name: 'Selesai', icon: <FaCheckCircle />, bgColor: 'bg-green', value: data.totalStatus?.['Selesai'] || 0, hasDetail: true, detailType: 'Selesai', tooltipText: `Jumlah ${prefix} yang sudah berhasil diselesaikan.` },
         { name: 'Pending', icon: <MdPendingActions />, bgColor: 'bg-slate-200', value: data.totalStatus?.['Pending'] || 0, hasDetail: true, detailType: 'Pending', tooltipText: `Jumlah ${prefix} yang ditunda.` },
         { name: 'Respon Time', icon: <MdOutlineAccessTimeFilled />, bgColor: 'bg-orange-200', value: data.totalData?.respon_time || 'N/A', hasDetail: false, tooltipText: `Rata-rata waktu respon untuk menangani ${prefix}.` },
-{ name: 'Durasi Pengerjaan', icon: <MdOutlineAccessTimeFilled />, bgColor: 'bg-violet-200', value: data.totalData?.durasi_pengerjaan || 'N/A', hasDetail: false, tooltipText: `Rata-rata durasi waktu pengerjaan untuk menyelesaikan ${prefix}.` },
+        { name: 'Durasi Pengerjaan', icon: <MdOutlineAccessTimeFilled />, bgColor: 'bg-violet-200', value: data.totalData?.durasi_pengerjaan || 'N/A', hasDetail: false, tooltipText: `Rata-rata durasi waktu pengerjaan untuk menyelesaikan ${prefix}.` },
     ].map(card => ({ ...card, service }));
 
     const komplainCards = createCards(komplainData, 'komplain', 'komplain');
@@ -66,7 +67,8 @@ const Dashboard = () => {
                             selectedYear={year}
                         />
 
-                        <h2 className="text-xl font-bold mb-4 mt-8">Komplain IT</h2>
+                        <h2 className="text-xl font-bold mb-2 mt-8">Komplain IT</h2>
+                        <Label lastUpdateTime={komplainData.lastUpdateTime} prefix="Data komplain terbaru masuk" />
                         <h3 className='text-base lg:text-lg font-bold text-white mb-4'>
                             <span className='bg-light-green py-2 px-3 rounded'>
                                 {`Total Komplain: ${komplainData.totalData?.total_komplain || 0}`}
@@ -82,7 +84,8 @@ const Dashboard = () => {
                             ))}
                         </div>
 
-                        <h2 className="text-xl font-bold mb-4 mt-12">Permintaan Update IT</h2>
+                        <h2 className="text-xl font-bold mb-2 mt-12">Permintaan Update IT</h2>
+                        <Label lastUpdateTime={updateData.lastUpdateTime} prefix="Data permintaan update terbaru masuk" />
                         <h3 className='text-base lg:text-lg font-bold text-white mb-4'>
                             <span className='bg-light-green py-2 px-3 rounded'>
                                 {`Total Permintaan: ${updateData.totalData?.total_update || 0}`}

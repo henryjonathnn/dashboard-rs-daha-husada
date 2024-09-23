@@ -123,6 +123,7 @@ class KomplainService
                             'Petugas' => $complaint['petugas'],
                             'Lokasi' => $complaint['lokasi'],
                             'Pesan' => $complaint['pesan'],
+                            'Keterangan' => $complaint['keterangan'],
                             'Waktu Masuk' => $complaint['datetime_masuk'],
                             'Waktu Pengerjaan' => $complaint['datetime_pengerjaan'],
                             'Waktu Selesai' => $complaint['datetime_selesai'],

@@ -15,7 +15,7 @@ class Komplain extends Model
     protected $table = 'form_values';
 
     protected $fillable = [
-        'id', 'json', 'datetime_masuk', 'datetime_pengerjaan', 'datetime_selesai', 'petugas', 'is_pending',
+        'id', 'json', 'datetime_masuk', 'datetime_pengerjaan', 'datetime_selesai', 'petugas', 'keterangan' , 'is_pending',
     ];
 
     protected static $unitCategories;
@@ -76,6 +76,7 @@ class Komplain extends Model
                         'lokasi' => $extractedData['lokasi'] ?? 'N/A',
                         'pesan' => $extractedData['pesan'] ?? 'N/A',
                         'status' => $status === 'Dalam Pengerjaan / Pengecekan Petugas' ? 'Dalam Pengerjaan' : $status,
+                        'keterangan' => $complaint->keterangan,
                         'original_status' => $status,
                         'created_at' => $complaint->created_at->format('Y-m-d H:i:s'),
                     ];

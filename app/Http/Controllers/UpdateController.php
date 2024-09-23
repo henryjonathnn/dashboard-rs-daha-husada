@@ -31,6 +31,12 @@ class UpdateController extends Controller
             ];
         });
 
+        $mostRecentEntry = Komplain::where('form_id', 4)
+            ->orderBy('datetime_masuk', 'desc')
+            ->first();
+
+        $lastUpdateTime = $mostRecentEntry ? $mostRecentEntry->datetime_masuk : null;
+
         return Inertia::render('PermintaanUpdate', [
             'data_bulan' => $this->updateService->getMonthOptions(),
             'data_tahun' => $this->updateService->getYearOptions(),
@@ -44,6 +50,7 @@ class UpdateController extends Controller
             'totalStatus' => $data['komplainStatus']['statusCount'],
             'detailStatus' => $data['detailStatus'],
             'dailyRequests' => $data['dailyRequests'],
+            'lastUpdateTime' => $lastUpdateTime,
         ]);
     }
 
