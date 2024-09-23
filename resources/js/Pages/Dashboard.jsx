@@ -6,6 +6,7 @@ import { IoSendSharp } from "react-icons/io5";
 import { FaTools, FaCheckCircle } from "react-icons/fa";
 import { MdPendingActions, MdOutlineAccessTimeFilled } from "react-icons/md";
 import Label from '../Components/ui/Label';
+import Loading from '../Components/ui/Loading';
 
 const Modal = lazy(() => import('@/Components/ui/Modal'));
 
@@ -101,7 +102,7 @@ const Dashboard = () => {
                             ))}
                         </div>
 
-                        <Suspense fallback={<div>Loading...</div>}>
+                        <Suspense fallback={<Loading />}>
                             <Modal
                                 isOpen={modalOpen}
                                 onClose={() => setModalOpen(false)}

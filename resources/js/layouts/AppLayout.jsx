@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import useResponsive from '@/hooks/useResponsive';
-import Loading from '@/components/ui/Loading'; // Import komponen Loading
+import Loading from '@/components/ui/Loading';
 
 const Sidebar = lazy(() => import('@/layouts/Sidebar'));
 const Navbar = lazy(() => import('@/layouts/Navbar'));
