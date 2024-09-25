@@ -1,11 +1,11 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import useResponsive from '@/hooks/useResponsive';
-import Loading from '@/components/ui/Loading';
+import useResponsive from '../hooks/useResponsive';
+import Loading from '../Components/ui/Loading';
 
-const Sidebar = lazy(() => import('@/layouts/Sidebar'));
-const Navbar = lazy(() => import('@/layouts/Navbar'));
-const Footer = lazy(() => import('@/layouts/Footer'));
+const Sidebar = lazy(() => import('../layouts/Sidebar'));
+const Navbar = lazy(() => import('../layouts/Navbar'));
+const Footer = lazy(() => import('../layouts/Footer'));
 
 const ErrorFallback = ({ error }) => (
   <div role="alert" className="p-4 bg-red-100 border border-red-400 text-red-700 rounded">

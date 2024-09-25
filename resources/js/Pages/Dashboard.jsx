@@ -1,14 +1,14 @@
 import React, { useState, useCallback, lazy, Suspense } from 'react';
 import { usePage, router } from '@inertiajs/react';
-import Card from '@/Components/ui/Card';
-import Selector from '@/Components/ui/Selector';
+import Card from '../Components/ui/Card';
+import Selector from '../Components/ui/Selector';
 import { IoSendSharp } from "react-icons/io5";
 import { FaTools, FaCheckCircle } from "react-icons/fa";
 import { MdPendingActions, MdOutlineAccessTimeFilled } from "react-icons/md";
 import Label from '../Components/ui/Label';
 import Loading from '../Components/ui/Loading';
 
-const Modal = lazy(() => import('@/Components/ui/Modal'));
+const Modal = lazy(() => import('../Components/ui/Modal'));
 
 const Dashboard = () => {
     const { komplainData, updateData, selectedYear, selectedMonth } = usePage().props;

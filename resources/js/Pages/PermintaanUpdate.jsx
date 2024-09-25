@@ -1,13 +1,12 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { usePage, router } from '@inertiajs/react';
-import Card from '@/Components/ui/Card';
+import Card from '../Components/ui/Card';
 import { IoSendSharp } from "react-icons/io5";
 import { FaTools, FaCheckCircle } from "react-icons/fa";
 import { MdPendingActions, MdOutlineAccessTimeFilled } from "react-icons/md";
 import Selector from '../Components/ui/Selector';
-import BarChart from '@/Components/charts/BarChart';
-import LineChart from '@/Components/charts/LineChart';
-import Modal from '@/Components/ui/Modal';
+import LineChart from '../Components/charts/LineChart';
+import Modal from '../Components/ui/Modal';
 import Label from '../Components/ui/Label';
 
 const PermintaanUpdate = () => {

@@ -1,4 +1,4 @@
-// src/layouts/Footer.jsx
+
 import React from 'react';
 
 const Footer = () => {

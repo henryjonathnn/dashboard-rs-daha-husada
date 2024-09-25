@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, lazy, useCallback } from 'react';
-import Loading from '../components/ui/Loading'
+import Loading from '../Components/ui/Loading'
 import Selector from '../Components/ui/Selector';
 import { router, usePage } from '@inertiajs/react';
 
