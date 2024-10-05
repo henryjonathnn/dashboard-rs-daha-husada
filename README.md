@@ -1,66 +1,104 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
 
-## About Laravel
+# Project Website Dashboard RSU Daha Husada Kediri
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![GitHub last commit](https://img.shields.io/github/last-commit/henryjonathnn/dashboard-rs-daha-husada)
+![GitHub issues](https://img.shields.io/github/issues/henryjonathnn/dashboard-rs-daha-husada)
+![GitHub stars](https://img.shields.io/github/stars/henryjonathnn/dashboard-rs-daha-husada)
+![GitHub license](https://img.shields.io/github/license/henryjonathnn/dashboard-rs-daha-husada)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📌 Tentang Proyek
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Proyek ini adalah proyek yang saya kerjakan ketika sedang PKL di RSU Daha Husada Kediri. Proyek ini dikembangkan untuk memudahkan petugas IT RSU Daha Husada Kediri untuk menerima laporan komplain dari unit-unit lain di rumah sakit, selain itu proyek ini dikemas di dalam website berbentuk dashboard yang memiliki banyak diagram/chart, sehingga memudahkan dalam melaporkan data kinerja petugas IT RSU Daha Husada Kediri dalam setiap bulannya dari tahun ke tahun.
 
-## Learning Laravel
+## ✨ Fitur Utama
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- 📊 **Dashboard**: Ringkasan jumlah data komplain dan permintaan update data RSU Daha Husada Kediri.
+- 🗳 **Data Komplain**: Ringkasan informasi khusus jumlah data komplain keseluruhan dan jumlah komplain per unitnya.
+- 📉 **Data Komplain Unit**: Detail informasi jumlah data komplain tiap unit dan polinya.
+- 🛠 **Data Kinerja Komplain**: Detail informasi jumlah data pengerjaan para petugas IT untuk menangani data-data komplain yang ada. 
+- 📝 **Data Permintaan Update Data**: Ringkasan informasi khusus jumlah data permintaan update data keseluruhan dan jumlah permintaan per harinya.
+- 🛠 **Data Kinerja Permintaan Update Data**: Detail informasi jumlah data pengerjaan para petugas IT untuk menangani permintaan-permintaan update data. 
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Teknologi yang Digunakan
 
-## Laravel Sponsors
+<div align="center">
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+[![Laravel][Laravel.com]][Laravel-url]
+[![React][React.js]][React-url]
+[![Vite][Vite.js]][Vite-url]
+[![TailwindCSS][TailwindCSS.com]][TailwindCSS-url]
+[![Inertia][Inertia.js]][Inertia-url]
 
-### Premium Partners
+</div>
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## 🚀 Cara Menggunakan
 
-## Contributing
+Ikuti langkah-langkah berikut untuk mengkloning dan menjalankan proyek:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# Kloning repositori
+git clone https://github.com/henryjonathnn/dashboard-rs-daha-husada.git
 
-## Code of Conduct
+# Masuk ke direktori proyek
+cd dashboard-rs-daha-husada
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Instal dependensi PHP
+composer install
 
-## Security Vulnerabilities
+# Instal dependensi Node.js
+npm install
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Salin file .env
+cp .env.example .env
 
-## License
+# Generate kunci aplikasi
+php artisan key:generate
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Jalankan migrasi database
+php artisan migrate
+
+# Jalankan server Laravel
+php artisan serve
+
+# Di terminal terpisah, jalankan Vite untuk kompilasi aset
+npm run dev
+```
+
+## 📞 Kontak
+
+<div align="center">
+
+[![Instagram][Instagram.com]][Instagram-url]
+[![LinkedIn][LinkedIn.com]][LinkedIn-url]
+[![Email][Email.com]][Email-url]
+[![YouTube][YouTube.com]][YouTube-url]
+
+</div>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[Instagram.com]: https://img.shields.io/badge/Instagram-%23E4405F.svg?style=for-the-badge&logo=Instagram&logoColor=white
+[Instagram-url]: https://instagram.com/henryjonathnn
+[LinkedIn.com]: https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white
+[LinkedIn-url]: https://www.linkedin.com/in/henry-jonathan-chandra-b531402a8/
+[Email.com]: https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white
+[Email-url]: mailto:henryjonathanchandra12@gmail.com
+[YouTube.com]: https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white
+[YouTube-url]: https://youtube.com/@henryjonathnn
+
+<div align="center">
+  © 2024 henryjonathnn. All rights reserved.
+</div>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
+[Laravel-url]: https://laravel.com
+[React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
+[React-url]: https://reactjs.org/
+[Vite.js]: https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=white
+[Vite-url]: https://vitejs.dev/
+[TailwindCSS.com]: https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white
+[TailwindCSS-url]: https://tailwindcss.com/
+[Inertia.js]: https://img.shields.io/badge/Inertia-8150E6?style=for-the-badge&logo=inertia&logoColor=white
+[Inertia-url]: https://inertiajs.com/
