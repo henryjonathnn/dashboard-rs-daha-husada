@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Cache;
 
 class UpdateService
 {
-    private const PETUGAS_LIST = ['Ganang', 'Agus', 'Ali Muhson', 'Virgie', 'Bayu', 'Adika Wicaksana'];
+    private const PETUGAS_LIST = ['Ganang', 'Agus', 'Ali Muhson', 'Virgie', 'Bayu', 'Adika Wicaksana', 'Pebri'];
     private const PETUGAS_REPLACEMENTS = [
         'Adi' => 'Adika Wicaksana',
         'adika' => 'Adika Wicaksana',
@@ -26,6 +26,7 @@ class UpdateService
         'vi' => 'Virgie',
         'ali' => 'Ali Muhson',
         'muhson' => 'Ali Muhson',
+        'pebri' => 'Pebri',
     ];
 
     private $formId;
